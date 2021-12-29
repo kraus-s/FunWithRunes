@@ -21,7 +21,7 @@ def load_data(inputFile = NRUNES_INFILE) -> List[Dict[str, str or int]]:
     return rawRunes
 
 
-def doc_builder(data: list[dict[str, str or int]]) -> List[List[str]]:
+def doc_builder(data: List[Dict[str, str or int]]) -> List[List[str]]:
     docsList = [x['runestring'] for x in data]
     tokenizedDocs = [x.split(',') for x in docsList]
     return tokenizedDocs
