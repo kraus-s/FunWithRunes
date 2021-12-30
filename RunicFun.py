@@ -13,19 +13,11 @@ def welcome():
                 every runic sequence was considered a document and tokenized on a grapheme level, i.e. every rune is its own token. The n-grams shown and counts
                 provided show the frequency with which every n-gram of individual runes occurs in the corpus.''')
 
-def get_data():
-    inFile = Path(NGRAM_RESULT_JSON)
-    if inFile.is_file():
-        df = pd.read_json(NGRAM_RESULT_JSON)
-    else:
-        df = nrunes.get_standard_data()
-    return df
-
 
 if __name__ == '__main__':
     welcome()
-    df = get_data()
-    st.write('Below you can see the static results of a bigram analysis')
-    st.table(df)
+    gramDFs = nrunes.get_standard_data()
+    selectGram = st.selectbox(label='Select ngram level you want to display (2=bigram, 3=trigram etc.):', options=gramDFs.keys(), index=0)
+    st.table(gramDFs[selectGram])
     st.header('About')
     st.write('All data and code are available on GitHub at: https://albertauyeung.github.io/2018/06/03/generating-ngrams.html/')
