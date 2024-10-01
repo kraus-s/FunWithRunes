@@ -1,7 +1,5 @@
 import json
 import pandas as pd
-from typing import List, Dict
-import csv
 from constants import *
 import os
 
@@ -13,7 +11,7 @@ import os
 # ---------------
 
 
-def load_data(input_file = NRUNES_INFILE) -> List[Dict[str, str | int]]:
+def load_data(input_file = NRUNES_INFILE) -> list[dict[str, str | int]]:
     try:
         with open(input_file, 'r', encoding="UTF-8") as f:
             raw_rune_string = json.load(f)
@@ -22,27 +20,40 @@ def load_data(input_file = NRUNES_INFILE) -> List[Dict[str, str | int]]:
     return raw_rune_string
 
 
-def doc_builder(data: List[Dict[str, str | int]]) -> List[List[str]]:
+def doc_builder(data: list[dict[str, str | int]], varied: bool = True) -> list[list[str]]:
+    """This function tokenizes the input runestrings. It can to so in two ways:
+    If varied is set to True, it will consider variants of normalized runes as separate tokens.
+    If varied is set to False, it will not consider the variants as established in Elisabeth Magins encoding."""
     docs_list = [x['runestring'] for x in data]
-    tokenized_docs = [x.split(',') for x in docs_list]
+    if varied:
+        tokenized_docs = [x.split(',') for x in docs_list]
+    elif not varied:
+        tokenized_docs_varied = [x.split(',') for x in docs_list]
+        tokenized_docs = []
+        for i in tokenized_docs_varied:
+            current_doc = []
+            for ii in i:
+                iii = "".join([x for x in ii if not x.isdigit()])
+                current_doc.append(iii)
+            tokenized_docs.append(current_doc)
     return tokenized_docs
 
 
-def nested_runestring_ngrammer(data: List[List[str]], stepsize: int = 1) -> List[List[str]]:
-    all_grams: List[List[str]] = []
+def nested_runestring_ngrammer(data: list[list[str]], stepsize: int = 1) -> list[list[str]]:
+    all_grams: list[list[str]] = []
     for runestring in data:
         shit = simple_ngrammer(runestring, stepsize)
         all_grams.append(shit)
     return all_grams
 
 
-def simple_ngrammer(data: List[str], stepsize: int):
+def simple_ngrammer(data: list[str], stepsize: int):
     temp = zip(*[data[i:] for i in range(stepsize)])
     n_grams = ["_".join(ngram) for ngram in temp]
     return n_grams
 
 
-def gram_sorter(data: List[List[str]]) -> pd.DataFrame:
+def gram_sorter(data: list[list[str]]) -> pd.DataFrame:
     flat_grams = [x for y in data for x in y]
     df = pd.DataFrame(flat_grams)
     df = df.groupby(df.columns.tolist(),as_index=False).size()
@@ -51,55 +62,49 @@ def gram_sorter(data: List[List[str]]) -> pd.DataFrame:
     return df
 
 
-# API Methods
+
+
+# Methods
 # -----------
 
-def get_standard_data(input_data = NRUNES_INFILE, stepsize=4, cache: bool = True, usecache: bool = True) -> Dict[int, pd.DataFrame]:
-    if usecache and len(os.listdir('displayData')) == 4:
-        gram_dfs: Dict[int, pd.DataFrame]
-        for i in os.listdir('displayData'):
-            df = pd.read_json(f'displayData/{i}')
-            dfno = int(i[0])
-            gram_dfs[dfno] = df
-        return gram_dfs
-    else: 
-        d1 = load_data(input_data)
-        d2 = doc_builder(d1)
-        gram_dfs: Dict[int, pd.DataFrame] = {}
-        for i in range(2, stepsize+1):
-            n_grams = nested_runestring_ngrammer(d2, i)
-            df = gram_sorter(n_grams)
-            if cache:
-                df.to_json(f"{FRONTEND_DELIVERY_DIR}{i}-{FRONTEND_FILE_SUFFIX}")
-            gram_dfs[i] = df
-        return gram_dfs
+def get_standard_data(data_dir: str = FRONTEND_DELIVERY_DIR) -> dict[int, pd.DataFrame]:
+    gram_dfs: dict[int, pd.DataFrame] = {"varied": {}, "unvaried": {}}
+    for i in os.listdir(data_dir):
+        df = pd.read_json(f'{data_dir}{i}')
+        dfno = int(i[0])
+        gram_dfs[dfno] = df
+    return gram_dfs
 
 
-# CLI Methods
-# -----------
+def analyze(input_data: str = NRUNES_INFILE, stepsize: int = 4, verbose: bool = False, varied: bool = True):    
+    """This function will produce 2, 3, and 4-grams data and drop the results in the data/results directory.
+     Input file should be namend nrunes.json and should be in the data directory, unless otherwise specified."""
+    # TODO: Refactor, this could be done more neatly
 
-# Use these methods when working from the command line.
-
-def analyze(input_data = NRUNES_INFILE, stepsize=2, output_filename: str = NGRAM_RESULT_JSON) -> None:
-    """This function should handly everything neccessary when working from the command line.
-        Params:
-            input_data (str): Path to a json file containing the runestrings to be analyzed.
-            stepsize (int): what kind of n-grams you want. 2=Bigrams, 3=Trigrams etc."""
     d1 = load_data(input_data)
-    d2 = doc_builder(d1)
-    n_grams = nested_runestring_ngrammer(d2, stepsize)
-    df = gram_sorter(n_grams)
-    df.to_json(output_filename)
-    print('Here are the results:')
-    print(df)
-    print('The results have been exported as json.')
+    d2 = doc_builder(d1, varied)
+
+    gram_dfs: dict[int, pd.DataFrame] = {}
+    for i in range(2, stepsize+1):
+        n_grams = nested_runestring_ngrammer(d2, i)
+        df = gram_sorter(n_grams)
+        if varied:
+            df.to_json(f"{FRONTEND_DELIVERY_DIR}varied-{i}{FRONTEND_FILE_SUFFIX}")
+        elif not varied:
+            df.to_json(f"{FRONTEND_DELIVERY_DIR}unvaried-{i}{FRONTEND_FILE_SUFFIX}")
+        if verbose:
+            print(f'{i}-grams have been exported as json.')
+            print(df)
+        gram_dfs[i] = df
     print('Done')
 
 
+def main():
+    """This function will run the analysis on the nrunes.json file in the data directory.
+    By default, it will analyze the data with varied=True and varied=False."""
+    analyze(varied=True)
+    analyze(varied=False)
 
 if __name__ == "__main__":
-    d1 = load_data()
-    d2 = doc_builder(d1)
-    n_grams = nested_runestring_ngrammer(d2, stepsize=2)
-    gram_sorter(n_grams)
+    main()
     

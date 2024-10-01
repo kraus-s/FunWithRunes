@@ -1,4 +1,4 @@
-NRUNES_INFILE = 'nrunes.json'
+NRUNES_INFILE = 'data/input/nrunes.json'
 NGRAM_RESULT_JSON = 'result_ngrams.json'
 
 FRONTEND_DELIVERY_DIR = "data/results/"
