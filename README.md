@@ -7,10 +7,7 @@ futhark characters.
 
 ## Runing the app
 
-There are two ways of running this application. You can either refer to the instance of the web app hosted in the Streamlit Community Cloud at the link here:
-
-ADD LINK!
-
+There are two ways of running this application. You can either refer to the instance of the web app hosted in the [Streamlit Community Cloud at this link](https://n-runes.streamlit.app/)
 or you can run this web app locally using pipenv.
 To do this, clone this repository and install dependencies using `pipenv install`.
 You can start the webapp from the command line using `pipenv run webapp` and run the analysis
