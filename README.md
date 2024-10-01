@@ -12,5 +12,8 @@ There are two ways of running this application. You can either refer to the inst
 ADD LINK!
 
 or you can run this web app locally using pipenv.
-
-TODO: ADD INSTRUCTIONS
+To do this, clone this repository and install dependencies using `pipenv install`.
+You can start the webapp from the command line using `pipenv run webapp` and run the analysis
+script using `pipenv run n-runer`.
+Please note that the script will look for a file named "nrunes.json" in the "data/input/" folder
+and save the results as json files in the "data/results" folder.
