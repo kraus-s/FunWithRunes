@@ -13,27 +13,27 @@ import os
 # ---------------
 
 
-def load_data(inputFile = NRUNES_INFILE) -> List[Dict[str, str or int]]:
+def load_data(input_file = NRUNES_INFILE) -> List[Dict[str, str | int]]:
     try:
-        with open(inputFile, 'r', encoding="UTF-8") as f:
-            rawRunes = json.load(f)
+        with open(input_file, 'r', encoding="UTF-8") as f:
+            raw_rune_string = json.load(f)
     except:
         print("Error loading data. Make sure you provided input data.")
-    return rawRunes
+    return raw_rune_string
 
 
-def doc_builder(data: List[Dict[str, str or int]]) -> List[List[str]]:
-    docsList = [x['runestring'] for x in data]
-    tokenizedDocs = [x.split(',') for x in docsList]
-    return tokenizedDocs
+def doc_builder(data: List[Dict[str, str | int]]) -> List[List[str]]:
+    docs_list = [x['runestring'] for x in data]
+    tokenized_docs = [x.split(',') for x in docs_list]
+    return tokenized_docs
 
 
 def nested_runestring_ngrammer(data: List[List[str]], stepsize: int = 1) -> List[List[str]]:
-    allGrams: List[List[str]] = []
+    all_grams: List[List[str]] = []
     for runestring in data:
         shit = simple_ngrammer(runestring, stepsize)
-        allGrams.append(shit)
-    return allGrams
+        all_grams.append(shit)
+    return all_grams
 
 
 def simple_ngrammer(data: List[str], stepsize: int):
@@ -42,9 +42,9 @@ def simple_ngrammer(data: List[str], stepsize: int):
     return n_grams
 
 
-def _gramSorter(data: List[List[str]]) -> pd.DataFrame:
-    flatGrams = [x for y in data for x in y]
-    df = pd.DataFrame(flatGrams)
+def gram_sorter(data: List[List[str]]) -> pd.DataFrame:
+    flat_grams = [x for y in data for x in y]
+    df = pd.DataFrame(flat_grams)
     df = df.groupby(df.columns.tolist(),as_index=False).size()
     df = df.sort_values(by='size', ascending=False)
     df = df.reset_index(drop=True)
@@ -54,25 +54,25 @@ def _gramSorter(data: List[List[str]]) -> pd.DataFrame:
 # API Methods
 # -----------
 
-def get_standard_data(inputData = NRUNES_INFILE, stepsize=4, cache: bool = True, usecache: bool = True) -> Dict[int, pd.DataFrame]:
+def get_standard_data(input_data = NRUNES_INFILE, stepsize=4, cache: bool = True, usecache: bool = True) -> Dict[int, pd.DataFrame]:
     if usecache and len(os.listdir('displayData')) == 4:
-        gramDfs: Dict[int, pd.DataFrame]
+        gram_dfs: Dict[int, pd.DataFrame]
         for i in os.listdir('displayData'):
             df = pd.read_json(f'displayData/{i}')
             dfno = int(i[0])
-            gramDfs[dfno] = df
-        return gramDfs
+            gram_dfs[dfno] = df
+        return gram_dfs
     else: 
-        d1 = load_data(inputData)
+        d1 = load_data(input_data)
         d2 = doc_builder(d1)
-        gramDfs: Dict[int, pd.DataFrame] = {}
+        gram_dfs: Dict[int, pd.DataFrame] = {}
         for i in range(2, stepsize+1):
-            nGrams = nested_runestring_ngrammer(d2, i)
-            df = _gramSorter(nGrams)
+            n_grams = nested_runestring_ngrammer(d2, i)
+            df = gram_sorter(n_grams)
             if cache:
-                df.to_json(f"displayData/{i}-gram-result.json")
-            gramDfs[i] = df
-        return gramDfs
+                df.to_json(f"{FRONTEND_DELIVERY_DIR}{i}-{FRONTEND_FILE_SUFFIX}")
+            gram_dfs[i] = df
+        return gram_dfs
 
 
 # CLI Methods
@@ -80,16 +80,16 @@ def get_standard_data(inputData = NRUNES_INFILE, stepsize=4, cache: bool = True,
 
 # Use these methods when working from the command line.
 
-def analyze(inputData = NRUNES_INFILE, stepsize=2, output_filename: str = NGRAM_RESULT_JSON) -> None:
+def analyze(input_data = NRUNES_INFILE, stepsize=2, output_filename: str = NGRAM_RESULT_JSON) -> None:
     """This function should handly everything neccessary when working from the command line.
         Params:
-            inputData (str): Path to a json file containing the runestrings to be analyzed.
+            input_data (str): Path to a json file containing the runestrings to be analyzed.
             stepsize (int): what kind of n-grams you want. 2=Bigrams, 3=Trigrams etc."""
-    d1 = load_data(inputData)
+    d1 = load_data(input_data)
     d2 = doc_builder(d1)
-    nGrams = nested_runestring_ngrammer(d2, stepsize)
-    df = _gramSorter(nGrams)
-    df.to_json(NGRAM_RESULT_JSON)
+    n_grams = nested_runestring_ngrammer(d2, stepsize)
+    df = gram_sorter(n_grams)
+    df.to_json(output_filename)
     print('Here are the results:')
     print(df)
     print('The results have been exported as json.')
@@ -100,6 +100,6 @@ def analyze(inputData = NRUNES_INFILE, stepsize=2, output_filename: str = NGRAM_
 if __name__ == "__main__":
     d1 = load_data()
     d2 = doc_builder(d1)
-    nGrams = nested_runestring_ngrammer(d2, stepsize=2)
-    _gramSorter(nGrams)
+    n_grams = nested_runestring_ngrammer(d2, stepsize=2)
+    gram_sorter(n_grams)
     
