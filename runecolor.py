@@ -14,7 +14,7 @@ unsafe = 'b'
 # Colors
 
 unsafe1 = 201, 33, 30   # Rune is safe, variant is not
-unsafe2 = 0, 0, 255     # Rune is unsafe, but if given rune is correct reading variant is safe
+unsafe2 = 0, 0, 255     # Rune is unsafe, but if given rune is correct, reading variant is safe
 unsafe3 = 102, 204, 0   # Both are unsafe
 
 # Functions
