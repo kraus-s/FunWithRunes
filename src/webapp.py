@@ -5,7 +5,7 @@ import nrunes
 
 
 def welcome():
-    st.title('Welcome to fun with runes!')
+    st.title('Welcome to the n-runes web app!')
     st.write('''This webapp is a companion to the research done by Dr. Elisabeth Magin. All data is taken from her research and provided by her.
                 All code is written by Sven Kraus at the University of Basel / Humboldt-Universität zu Berlin.''')
     st.write('''For now all you can display are the results of an n-gram analysis of the entire corpus of Elisabeths PhD research. For the purpose of this analysis, 
@@ -15,6 +15,7 @@ def welcome():
 
 if __name__ == '__main__':
     welcome()
-    gramDFs = nrunes.get_standard_data()
-    selectGram = st.selectbox(label='Select ngram level you want to display (2=bigram, 3=trigram etc.):', options=gramDFs.keys(), index=0)
-    st.table(gramDFs[selectGram])
+    gram_dfs = nrunes.get_standard_data()
+    variance = st.selectbox(label="Do you want you want to display n-grams for runes with numeric variance encoding or without?", options=gram_dfs.keys(), index=0)
+    select_gram = st.selectbox(label='Select ngram level you want to display (2=bigram, 3=trigram etc.):', options=gram_dfs[variance].keys(), index=0)
+    st.dataframe(gram_dfs[variance][select_gram], hide_index=True, use_container_width=True)

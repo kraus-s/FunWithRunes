@@ -2,6 +2,7 @@ import json
 import pandas as pd
 from constants import *
 import os
+import glob
 
 # This script perfroms n-gram analyses on runestrings.
 # Analysis structure: Every runic sequence is treated as a document, every individual rune is treated as a token.
@@ -69,10 +70,13 @@ def gram_sorter(data: list[list[str]]) -> pd.DataFrame:
 
 def get_standard_data(data_dir: str = FRONTEND_DELIVERY_DIR) -> dict[int, pd.DataFrame]:
     gram_dfs: dict[int, pd.DataFrame] = {"varied": {}, "unvaried": {}}
-    for i in os.listdir(data_dir):
-        df = pd.read_json(f'{data_dir}{i}')
-        dfno = int(i[0])
-        gram_dfs[dfno] = df
+    for i in glob.glob(f"{FRONTEND_DELIVERY_DIR}*.json"):
+        with open(i, "r", encoding="utf-8") as f:
+            df = pd.read_json(f)
+        name = i.split("/")[-1]
+        name_parts = name.split("-")
+        df.rename(columns={"0": "rune-gram", "size": "frequency"}, inplace=True)
+        gram_dfs[name_parts[0]][int(name_parts[1])] = df
     return gram_dfs
 
 

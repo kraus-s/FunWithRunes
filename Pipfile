@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 streamlit = "*"
+pandas = "*"
 
 [dev-packages]
 
@@ -12,6 +13,5 @@ streamlit = "*"
 python_version = "3.12"
 
 [scripts]
-
 webapp = "streamlit run src/webapp.py"
-n-runer = "streamlit run src/nrunes.py"
+n-runer = "python src/nrunes.py"
