@@ -9,7 +9,7 @@ def welcome():
     st.write('''This webapp is a companion to the research done by Dr. Elisabeth Magin. All data is taken from her research and provided by her.
                 All code is written by Sven Kraus at the University of Basel / Humboldt-Universität zu Berlin.
                 You can find the code on GitHub: https://github.com/kraus-s/n-runes''')
-    st.write('''For now all you can display are the results of an n-gram analysis of the entire corpus of Elisabeths PhD research. For the purpose of this analysis, 
+    st.write('''For now all you can display are the results of an n-gram analysis of the entire corpus of Elisabeth's PhD research. For the purpose of this analysis, 
                 every runic sequence was considered a document and tokenized on a grapheme level, i.e. every rune is its own token. The n-grams shown and counts
                 provided show the frequency with which every n-gram of individual runes occurs in the corpus.''')
 

@@ -13,5 +13,5 @@ pandas = "*"
 python_version = "3.12"
 
 [scripts]
-webapp = "streamlit run src/webapp.py"
+webapp = "python -m streamlit run src/webapp.py"
 n-runer = "python src/nrunes.py"
